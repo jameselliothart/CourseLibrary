@@ -9,6 +9,8 @@ namespace CourseLibrary.API.Helpers
 {
     public class ArrayModelBinder : IModelBinder
     {
+        // parses (a64eb192-f782-4252-b1e5-8fecd1447e97,61f17ee9-0211-45d8-a676-93762b5e5cc5)
+        // into typed array of guids
         public Task BindModelAsync(ModelBindingContext bindingContext)
         {
             // Only works for enumerable types
@@ -27,6 +29,7 @@ namespace CourseLibrary.API.Helpers
                 return Task.CompletedTask;
             }
 
+            // returns Guid from IEnumerable<Guid>
             var elementType = bindingContext.ModelType.GetTypeInfo().GenericTypeArguments[0];
             var converter = TypeDescriptor.GetConverter(elementType);
 
@@ -34,6 +37,7 @@ namespace CourseLibrary.API.Helpers
                 .Select(x => converter.ConvertFromString(x.Trim()))
                 .ToArray();
 
+            // creates Array<Guid> of correct length
             var typedValues = Array.CreateInstance(elementType, values.Length);
             values.CopyTo(typedValues, 0);
             bindingContext.Model = typedValues;
