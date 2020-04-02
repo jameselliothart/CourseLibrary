@@ -73,7 +73,7 @@ namespace CourseLibrary.API.Controllers
         }
 
         [HttpPut("{courseId}")]
-        public ActionResult UpdateCourseForAuthor(Guid authorId,
+        public IActionResult UpdateCourseForAuthor(Guid authorId,
             Guid courseId,
             CourseForUpdateDto course)
         {
@@ -83,7 +83,18 @@ namespace CourseLibrary.API.Controllers
             }
             var courseForAuthorFromRepo = _courseLibraryRepository.GetCourse(authorId, courseId);
             if (courseForAuthorFromRepo == null)
-                return NotFound();
+            {
+                var courseToAdd = _mapper.Map<Entities.Course>(course);
+                courseToAdd.Id = courseId;
+
+                _courseLibraryRepository.AddCourse(authorId, courseToAdd);
+                _courseLibraryRepository.Save();
+
+                var courseToReturn = _mapper.Map<CourseDto>(courseToAdd);
+            return CreatedAtAction(nameof(GetCourseForAuthor),
+                new { authorId, courseId = courseToReturn.Id},
+                courseToReturn);
+            }
 
             // map entity to CourseForUpdateDto
             // apply updated fields to that dto
