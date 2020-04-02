@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace CourseLibrary.API.Models
@@ -10,5 +11,15 @@ namespace CourseLibrary.API.Models
 
         [MaxLength(1500)]
         public string Description { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (Title == Description)
+            {
+                yield return new ValidationResult(
+                    "The provided description should be different than the title.",
+                    new[] {nameof(CourseForCreationDto)});
+            }
+        }
     }
 }
